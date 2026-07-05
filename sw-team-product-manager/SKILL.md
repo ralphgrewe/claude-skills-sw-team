@@ -18,7 +18,7 @@ From the issue body and comments, work out:
 
 Do not guess at any of these. If something is unclear, ask the user directly in conversation — use `AskUserQuestion` for concrete choices between options, plain text for open-ended questions. Ask everything you need in as few rounds as possible, but keep asking until there are no open questions left; don't move on with an assumption standing in for an answer.
 
-Once it's clear, write a refined version of the issue: a crisp problem statement, explicit acceptance criteria, called-out edge cases, anything explicitly out of scope, an entry-points section, and a model recommendation (see below). Update the issue on GitHub with `mcp__github__issue_write` (`method: update`). Prepend `[claude-edited]` to the first line of the updated body so the refined spec lives where the implementer will look for it — don't invent scope the user didn't confirm, and don't discard context from the original author.
+Once it's clear, write a refined version of the issue: a crisp problem statement, explicit acceptance criteria, called-out edge cases, anything explicitly out of scope, an entry-points section, and a model recommendation (see below). Update the issue on GitHub with `mcp__github__issue_write` (`method: update`) and add the "Claude-Edited" label so the refined spec lives where the implementer will look for it — don't invent scope the user didn't confirm, and don't discard context from the original author.
 
 ### Entry points
 
@@ -62,7 +62,7 @@ If it genuinely fits in one step, stop here — the refined issue is ready for `
 If it needs breaking down, split it into small, independently valuable, agile increments:
 - Prefer small vertical slices that each deliver something testable and reviewable on their own, over horizontal layers (avoid splitting into "add models" / "add API" / "add UI" unless the work is genuinely only sequential that way)
 - Make dependencies between sub-issues explicit: state "Blocked by #N" (not just "depends on #N") in the body of the dependent issue. 
-- For each sub-issue: create it with `mcp__github__issue_write` (`method: create`) with body starting with `[Claude]` on the first line — clear title, refined body (problem, acceptance criteria, out of scope, entry points and model recommendation per Step 2), carrying over labels/type from the parent where relevant. Judge the model per sub-issue, not from the parent — breaking down often turns an opus-sized parent into haiku/sonnet-sized slices. Likewise scope the entry points per sub-issue to what that slice actually touches, rather than copying the parent's full list.
+- For each sub-issue: create it with `mcp__github__issue_write` (`method: create`) with the "Claude" label — clear title, refined body (problem, acceptance criteria, out of scope, entry points and model recommendation per Step 2), carrying over labels/type from the parent where relevant. Judge the model per sub-issue, not from the parent — breaking down often turns an opus-sized parent into haiku/sonnet-sized slices. Likewise scope the entry points per sub-issue to what that slice actually touches, rather than copying the parent's full list.
 - Attach each new issue to the parent with `mcp__github__sub_issue_write` (`method: add`)
 - Order them to match intended implementation order with `mcp__github__sub_issue_write` (`method: reprioritize`) if the creation order doesn't already reflect it
 

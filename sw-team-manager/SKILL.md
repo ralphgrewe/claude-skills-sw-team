@@ -20,7 +20,7 @@ For the set of issues, determine dependencies by reading their descriptions (doe
 
 For each issue, launch a `general-purpose` sub-agent using this prompt template, filled in per issue.
 
-**Entry points:** each issue body should contain an `## Entry points` section written by sw-team-product-manager (files to edit, files to read for context, docs/URLs). Before dispatching an issue, bring that section up to date with what you already know from planning and from previously completed issues — files they created or moved, relevant commit SHAs — via `mcp__github__issue_write` (`method: update`), prepending `[claude-edited]` to the first line; add the section (with its disclaimer line "Starting points, not exhaustive — verify before relying on this, extend as you discover more.") if it's missing. Only write down knowledge you already have — don't spend extra exploration effort growing the list. This keeps the knowledge in the ticket rather than only in your conversation, so retries, escalations, and future sessions don't re-derive it.
+**Entry points:** each issue body should contain an `## Entry points` section written by sw-team-product-manager (files to edit, files to read for context, docs/URLs). Before dispatching an issue, bring that section up to date with what you already know from planning and from previously completed issues — files they created or moved, relevant commit SHAs — via `mcp__github__issue_write` (`method: update`) and add the "Claude-Edited" label; add the section (with its disclaimer line "Starting points, not exhaustive — verify before relying on this, extend as you discover more.") if it's missing. Only write down knowledge you already have — don't spend extra exploration effort growing the list. This keeps the knowledge in the ticket rather than only in your conversation, so retries, escalations, and future sessions don't re-derive it.
 
 **Model routing:** each issue body should contain a `## Model recommendation` section written by sw-team-product-manager (`Model: haiku|sonnet|opus`). Pass that value as the `model` parameter of the `Agent` call. If the section is missing, default to `model: "sonnet"`. Don't second-guess the recommendation upward on the first attempt — escalation in Step 4 handles underpowered attempts.
 
@@ -39,7 +39,7 @@ Repo conventions: read and follow {path to CLAUDE.md or relevant docs}.
 Steps:
 1. If anything required to implement this issue is ambiguous or missing (unclear
    acceptance criteria, missing config, conflicting instructions), do NOT guess — post
-   a comment on the issue with your specific question, do not implement on a guess.
+   a comment on the issue with your specific question (add the "Claude" label), do not implement on a guess.
 2. Otherwise, implement the change described in issue #{N}.
 3. Add/update tests covering the change.
 4. Run the test suite ({test command}) — it must pass before proceeding.
@@ -50,9 +50,10 @@ Steps:
 6. Comment on the issue using exactly this structure. Keep it brief: key points,
    not exhaustive lists. Do NOT enumerate every modified file — the commit itself
    is the authoritative file list; name a file only where it aids orientation.
+   Add the "Claude" label to the issue when posting this comment.
 
    ```markdown
-   [Claude] Implemented in commit {SHA} on branch {branch}.
+   Implemented in commit {SHA} on branch {branch}.
 
    **What changed**
    - <one key point per logical change, naming the main file/module where helpful>
