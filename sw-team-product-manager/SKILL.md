@@ -36,16 +36,20 @@ Every issue you write — the refined issue here, and each sub-issue in Step 4 �
 
 ```
 ## Model recommendation
-Model: haiku|sonnet|opus
-Reasoning: <one line — why this is the smallest model that can handle it>
+Model: haiku|sonnet
+Reasoning: <one line — for haiku, why it fits; for sonnet, the concrete evidence that haiku would fail>
 ```
 
-Pick the **smallest** model that can plausibly do the job:
-- **haiku** — mechanical, well-specified changes touching a few files (roughly ≤3, or up to ~5 when it's the same edit repeated across files): doc/config updates, renames, small fixes plus their test, applying an existing pattern. What matters is that the files don't need to be designed together — the change in each is obvious in isolation.
-- **sonnet** — the default: typical feature work, changes where several files interact and need design judgment.
-- **opus** — cross-cutting or architecturally tricky changes, subtle debugging, or issues that remain complex even after refinement.
+**Haiku is the default.** The question is never "which model is right-sized for this?" — it is "is there strong evidence haiku would fail?", and only with that evidence in hand do you recommend sonnet. A well-refined issue (crisp acceptance criteria, entry points, no design ambiguity) is exactly what haiku handles; if an issue doesn't feel haiku-ready, that usually means refinement or breakdown isn't finished — go back to Step 2/4 and sharpen or split it rather than reaching for a bigger model.
 
-When in doubt between two tiers, pick the smaller one — sw-team-manager escalates one tier up automatically if verification of the implementation fails.
+Recommend **sonnet** only when you can name the specific difficulty in the Reasoning line, for example:
+- the issue requires designing a new abstraction or interface that later work will build on
+- several files must be designed together and the issue genuinely can't be split further
+- the root cause is still unknown after refinement (open-ended debugging)
+
+Vague unease ("feels complex", "touches many files") is not evidence — it's a signal to break the issue down further. Never recommend **opus** upfront: opus is reached only through sw-team-manager's escalation path after a smaller model demonstrably failed.
+
+The asymmetry that justifies this bias: an underpowered recommendation is cheap and self-correcting — sw-team-manager verifies every implementation, runs a design review on every commit, and escalates one tier automatically on failure. An overpowered recommendation is never corrected downward and silently costs on every issue.
 
 ## Step 3: Decide — one step, or break it down
 
