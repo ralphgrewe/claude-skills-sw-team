@@ -14,7 +14,7 @@ Resolve the input (owner/repo + issue number — infer the repo from the current
 From the issue body and comments, work out:
 - The actual goal / user story (what problem is this solving, for whom)
 - Acceptance criteria, explicit or implied
-- Ambiguities, missing information, conflicting requirements, unstated edge cases
+- Ambiguities, missing information, conflicting requirements, unstated edge cases#
 
 Do not guess at any of these. If something is unclear, ask the user directly in conversation — use `AskUserQuestion` for concrete choices between options, plain text for open-ended questions. Ask everything you need in as few rounds as possible, but keep asking until there are no open questions left; don't move on with an assumption standing in for an answer.
 
@@ -40,14 +40,13 @@ Model: haiku|sonnet
 Reasoning: <one line — for haiku, why it fits; for sonnet, the concrete evidence that haiku would fail>
 ```
 
-**Haiku is the default.** The question is never "which model is right-sized for this?" — it is "is there strong evidence haiku would fail?", and only with that evidence in hand do you recommend sonnet. A well-refined issue (crisp acceptance criteria, entry points, no design ambiguity) is exactly what haiku handles; if an issue doesn't feel haiku-ready, that usually means refinement or breakdown isn't finished — go back to Step 2/4 and sharpen or split it rather than reaching for a bigger model.
+**Haiku is the default.** Only if there is very strong evidence that haiku would fail, you do you recommend sonnet. A well-refined issue (crisp acceptance criteria, entry points, no design ambiguity) is exactly what haiku handles; if an issue doesn't feel haiku-ready, that usually means refinement or breakdown isn't finished — go back to Step 2/4 and sharpen or split it rather than reaching for a bigger model.
 
 Recommend **sonnet** only when you can name the specific difficulty in the Reasoning line, for example:
-- the issue requires designing a new abstraction or interface that later work will build on
-- several files must be designed together and the issue genuinely can't be split further
+- several files must be designed together and the issue genuinely can't be split further, risking haikus context window to overflow
 - the root cause is still unknown after refinement (open-ended debugging)
 
-Vague unease ("feels complex", "touches many files") is not evidence — it's a signal to break the issue down further. Never recommend **opus** upfront: opus is reached only through sw-team-manager's escalation path after a smaller model demonstrably failed.
+Never recommend **opus** upfront: opus is reached only through sw-team-manager's escalation path after a smaller model demonstrably failed.
 
 The asymmetry that justifies this bias: an underpowered recommendation is cheap and self-correcting — sw-team-manager verifies every implementation, runs a design review on every commit, and escalates one tier automatically on failure. An overpowered recommendation is never corrected downward and silently costs on every issue.
 
