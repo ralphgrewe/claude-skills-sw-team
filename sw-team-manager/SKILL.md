@@ -22,7 +22,7 @@ For each issue, launch a `general-purpose` sub-agent using this prompt template,
 
 **Entry points:** each issue body should contain an `## Entry points` section written by sw-team-product-manager (files to edit, files to read for context, docs/URLs). Before dispatching an issue, bring that section up to date with what you already know from planning and from previously completed issues — files they created or moved, relevant commit SHAs — via `mcp__github__issue_write` (`method: update`) and add the "Claude-Edited" label; add the section (with its disclaimer line "Starting points, not exhaustive — verify before relying on this, extend as you discover more.") if it's missing. Only write down knowledge you already have — don't spend extra exploration effort growing the list. This keeps the knowledge in the ticket rather than only in your conversation, so retries, escalations, and future sessions don't re-derive it.
 
-**Model routing:** each issue body should contain a `## Model recommendation` section written by sw-team-product-manager (`Model: haiku|sonnet`). Pass that value as the `model` parameter of the `Agent` call. If the section is missing, default to `model: "haiku"`. Never dispatch a first attempt on opus — opus is reserved for escalation in Step 4. Don't second-guess the recommendation upward on the first attempt — verification, the design review, and escalation handle underpowered attempts.
+**Model routing:** each issue body should contain a `## Model recommendation` section written by sw-team-product-manager (`Model: haiku|sonnet`). Pass that value as the `model` parameter of the `Agent` call. If the section is missing, default to `model: "haiku"`. Don't second-guess the recommendation upward on the first attempt — verification, the design review, and escalation handle underpowered attempts.
 
 ```
 Implement GitHub issue #{N} in {repo_path}.
@@ -83,7 +83,7 @@ Do not take a sub-agent's "done" summary at face value. After each agent finishe
 
 Mechanical verification catches broken changes, not quiet design debt — with haiku as the default implementer, the failure mode to guard against is not failing tests but design flaws that pass them and accumulate over time. So once the checks above pass, launch a review sub-agent with `model: "sonnet"` rather than reading the diff yourself (this keeps the diff out of your context). Prompt it to inspect `git diff <commit>~1 <commit>` in {repo_path} against the issue body and report **design/architecture findings only, no style nits**: duplicated logic that should reuse an existing helper, new code that ignores the codebase's existing patterns or abstractions, responsibilities placed in the wrong module, hardcoded values that clearly need to be configurable, missing error handling on paths the issue's acceptance criteria care about. Instruct it to end with a verdict line: `DESIGN: OK` or `DESIGN: FLAWED` followed by one line per finding.
 
-- `OK` → the issue is done; proceed.
+- `OK` → the issue is done; add the "Claude-Haiku-Solved" label to the issue and proceed.
 - `FLAWED` → treat it as failed verification and escalate per the rule below, quoting the findings in the addendum.
 
 After a verified, completed issue, update the `## Entry points` section of not-yet-dispatched issues it affects (files it created, moved, or made obsolete, plus the commit SHA) — you have this knowledge in hand right now, and writing it into the tickets is what spares the next dispatch (or a future session) from re-deriving it.
