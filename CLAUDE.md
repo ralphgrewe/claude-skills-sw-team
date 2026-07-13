@@ -12,6 +12,14 @@ A set of Claude Code **skills** that make Claude operate as an agile software te
   ```bash
   scripts/test-mistral-implement.sh
   ```
+- Print haiku-first escalation statistics (evidence for the model-routing experiment) across every repo under the authenticated `gh` account, or a named subset:
+  ```bash
+  ./venv/bin/python scripts/escalation-stats.py [--repo OWNER/REPO ...]
+  ```
+  Test its guardrails (bad `--repo` format, missing/unauthenticated `gh` — no network calls):
+  ```bash
+  scripts/test-escalation-stats.sh
+  ```
 - There is no other lint/build/test step in this repo.
 
 ## Architecture
