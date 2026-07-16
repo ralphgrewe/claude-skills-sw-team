@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Aggregate haiku-first model-routing evidence across GitHub issues.
 
-Scans closed issues (via the `gh` CLI) for the "Claude-Model-Escalation" and
-"Ralph-Haiku-Downgraded" labels and prints a plain-text statistics report on
-how often haiku-first dispatch actually held up. See CLAUDE.md's "GitHub
-labels as state/evidence tracking" section for what each label means, and
-issue #6 for the full spec this script implements.
+Scans closed issues (via the `gh` CLI) for the "Claude-Model-Escalation",
+"Ralph-Haiku-Downgraded", "Claude-Haiku-Solved", "Claude-Sonnet-Solved", and
+"Claude-Opus-Solved" labels and prints a plain-text statistics report on how
+often haiku-first dispatch actually held up. See CLAUDE.md's "GitHub labels as
+state/evidence tracking" section for what each label means, and issue #6 for
+the full spec this script implements.
 
 Usage: escalation-stats.py [--repo OWNER/REPO ...]
   No --repo: scans every repo under the authenticated gh account.
@@ -25,6 +26,9 @@ import sys
 
 ESCALATION_LABEL = "Claude-Model-Escalation"
 DOWNGRADE_LABEL = "Ralph-Haiku-Downgraded"
+HAIKU_SOLVED_LABEL = "Claude-Haiku-Solved"
+SONNET_SOLVED_LABEL = "Claude-Sonnet-Solved"
+OPUS_SOLVED_LABEL = "Claude-Opus-Solved"
 
 ISSUES_PER_REPO_LIMIT = 1000
 PER_PAGE = 100
@@ -126,6 +130,9 @@ def main() -> None:
     sonnet_to_opus = 0
     downgraded = 0
     downgraded_then_escalated = 0
+    haiku_solved = 0
+    sonnet_solved = 0
+    opus_solved = 0
     unparseable: list[str] = []
 
     for repo in repos:
@@ -154,6 +161,13 @@ def main() -> None:
                 downgraded += 1
             if has_downgrade and has_escalation:
                 downgraded_then_escalated += 1
+
+            if HAIKU_SOLVED_LABEL in labels:
+                haiku_solved += 1
+            if SONNET_SOLVED_LABEL in labels:
+                sonnet_solved += 1
+            if OPUS_SOLVED_LABEL in labels:
+                opus_solved += 1
 
             if has_escalation:
                 text, cerr = fetch_comments_text(repo, number)
@@ -191,6 +205,11 @@ def main() -> None:
     print("Escalation buckets (% of implemented total; not mutually exclusive):")
     print(f"  haiku -> sonnet:                 {haiku_to_sonnet} ({pct(haiku_to_sonnet):.1f}%)")
     print(f"  sonnet -> opus:                  {sonnet_to_opus} ({pct(sonnet_to_opus):.1f}%)")
+    print()
+    print("Tier-solved buckets (% of implemented total; not mutually exclusive with escalation buckets):")
+    print(f"  haiku solved:                    {haiku_solved} ({pct(haiku_solved):.1f}%)")
+    print(f"  sonnet solved:                   {sonnet_solved} ({pct(sonnet_solved):.1f}%)")
+    print(f"  opus solved:                     {opus_solved} ({pct(opus_solved):.1f}%)")
     print()
     print("Manual downgrade bucket:")
     print(f"  {DOWNGRADE_LABEL}:      {downgraded} ({pct(downgraded):.1f}%)")
