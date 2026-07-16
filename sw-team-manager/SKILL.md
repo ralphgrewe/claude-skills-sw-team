@@ -5,6 +5,8 @@ description: "Implementation orchestrator for GitHub issues. Use when asked to i
 
 You are acting as the orchestrator (engineering manager), not the implementer. Never write code yourself in this skill — always delegate implementation to sub-agents. Your job is planning, dispatch, and verification.
 
+**Labels are additive, never replace wholesale.** `mcp__github__issue_write`'s `labels` field mirrors GitHub's REST API: whatever list you pass *replaces* the issue's entire label set — it does not append. Every instruction below to "add label X" means: first fetch the issue's current labels (`mcp__github__issue_read`, `method: get_labels`), then call `issue_write` with the union of the current labels plus X. Never call it with a bare `[X]` — that silently deletes every other label on the issue, including ones the user applied manually (e.g. `Ralph-Haiku-Downgraded`).
+
 ## Step 1: Gather the issues
 
 Resolve the input (a single issue number, a parent issue with linked sub-issues, or an explicit list) into a concrete set of issue numbers to implement. Use the github mcp, e.g. `mcp__github__issue_read` / `mcp__github__list_issues` tools to read each one. If a parent issue references sub-issues, expand it into the full list before planning.
@@ -83,7 +85,10 @@ Do not take a sub-agent's "done" summary at face value. After each agent finishe
 
 Mechanical verification catches broken changes, not quiet design debt — with haiku as the default implementer, the failure mode to guard against is not failing tests but design flaws that pass them and accumulate over time. So once the checks above pass, launch a review sub-agent with `model: "sonnet"` rather than reading the diff yourself (this keeps the diff out of your context). Prompt it to inspect `git diff <commit>~1 <commit>` in {repo_path} against the issue body and report **design/architecture findings only, no style nits**: duplicated logic that should reuse an existing helper, new code that ignores the codebase's existing patterns or abstractions, responsibilities placed in the wrong module, hardcoded values that clearly need to be configurable, missing error handling on paths the issue's acceptance criteria care about. Instruct it to end with a verdict line: `DESIGN: OK` or `DESIGN: FLAWED` followed by one line per finding.
 
-- `OK` → the issue is done; add the "Claude-Haiku-Solved" label to the issue and proceed.
+- `OK` → the issue is done. Add the tier-correct `Claude-<Tier>-Solved` label to the issue and proceed. Follow the "labels are additive" convention (top of this file): fetch current labels first via `mcp__github__issue_read` (`method: get_labels`), then add the new label to the set:
+  - If haiku was dispatched: add `Claude-Haiku-Solved`.
+  - If sonnet was dispatched: add `Claude-Sonnet-Solved`.
+  - If opus was dispatched: add `Claude-Opus-Solved`.
 - `FLAWED` → treat it as failed verification and escalate per the rule below, quoting the findings in the addendum.
 
 After a verified, completed issue, update the `## Entry points` section of not-yet-dispatched issues it affects (files it created, moved, or made obsolete, plus the commit SHA) — you have this knowledge in hand right now, and writing it into the tickets is what spares the next dispatch (or a future session) from re-deriving it.
@@ -97,7 +102,7 @@ If verification fails — the diff doesn't actually implement the issue, tests f
 - what verification or the design review found wrong,
 - an instruction to first inspect the current state and either fix forward or cleanly revert before re-implementing.
 
-When escalating, also post a short comment on the issue and add the "Claude-Model-Escalation" label to the issue: the tier change (from → to model) and the one-line reason the smaller model's attempt was rejected. These comments are the raw data for tuning the model-recommendation criteria — over time, patterns in them are what tell us which issue shapes genuinely need sonnet rather than haiku.
+When escalating, also post a short comment on the issue and add the "Claude-Model-Escalation" label to the issue: the tier change (from → to model) and the one-line reason the smaller model's attempt was rejected. These comments are the raw data for tuning the model-recommendation criteria — over time, patterns in them are what tell us which issue shapes genuinely need sonnet rather than haiku. Note: the "Claude-Model-Escalation" label remains on the issue as evidence of the escalation history; if the escalated attempt then passes design review, the escalated tier's `Claude-<Tier>-Solved` label (e.g., `Claude-Sonnet-Solved` if escalated from haiku to sonnet) is added alongside it — the issue will carry both labels.
 
 If verification fails on opus, stop and surface the issue to the user instead. This rule is not optional: when issues run on a model below opus — especially unattended — the failure mode to guard against is a cheap model half-implementing a change and closing the issue anyway. Mention any escalations (issue, from → to model, reason) in the Step 5 summary.
 

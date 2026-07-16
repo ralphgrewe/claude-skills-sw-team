@@ -46,6 +46,8 @@ Escalations and haiku successes are both recorded as labels (see below) because 
 
 - `Claude` / `Claude-Edited` — an issue was created/edited by these skills.
 - `Claude-Haiku-Solved` — design review passed at haiku tier (positive evidence for the haiku-first bias).
+- `Claude-Sonnet-Solved` — design review passed at sonnet tier (whether sonnet was the initial dispatch or reached via escalation from haiku).
+- `Claude-Opus-Solved` — design review passed at opus tier (always reached via escalation, since opus is never an initial recommendation).
 - `Claude-Model-Escalation` — verification failed and the issue was bumped a tier; the escalation comment records the from→to model and the one-line rejection reason. Query this label to see the accumulated evidence for what haiku actually fails at.
 
 ### Issue ↔ code traceability
